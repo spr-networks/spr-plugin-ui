@@ -1,3 +1,5 @@
+# Note: autocoded with LLMs
+
 # @spr-networks/plugin-ui
 
 Shared frontend kit for [SPR](https://www.supernetworks.org) plugins. Gives a plugin's
