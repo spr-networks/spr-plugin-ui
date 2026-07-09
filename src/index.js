@@ -21,3 +21,4 @@ export {
   Loading
 } from './components/layout'
 export { TextField, ModalForm, ModalConfirm } from './components/forms'
+export { timeAgo } from './utils'

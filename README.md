@@ -83,6 +83,7 @@ Pass `onMessage` to `PluginApp` to observe non-theme host messages.
 - `Page`, `ListHeader`, `ListItem`, `EmptyState`, `Loading` — layout
 - `Card`, `StatusDot`, `StatTile`, `SectionHeader`, `Toggle`, `KeyVal` — fittings
 - `TextField`, `ModalForm`, `ModalConfirm` — forms
+- `timeAgo` — humanize an RFC3339 timestamp (`'5m ago'`; `null` for empty/Go zero time)
 - `readInitialTheme`, `subscribeTheme`, `READY_MESSAGE` — theme bridge internals
 
 ## template/
