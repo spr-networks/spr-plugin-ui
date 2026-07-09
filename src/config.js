@@ -1,6 +1,9 @@
 import { config as defaultConfig } from '@gluestack-ui/config'
 
-const colors = defaultConfig.tokens.colors
+const systemSans =
+  "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+const systemMono =
+  "'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace"
 
 export const config = {
   ...defaultConfig,
@@ -10,16 +13,16 @@ export const config = {
       ...defaultConfig.tokens.colors,
 
       primary0: '#ffffff',
-      primary50: colors.blueGray50,
-      primary100: colors.blueGray100,
-      primary200: colors.blueGray200,
-      primary300: colors.blueGray300,
-      primary400: colors.blueGray400,
-      primary500: colors.blueGray500,
-      primary600: colors.blueGray600,
-      primary700: colors.blueGray700,
-      primary800: colors.blueGray800,
-      primary900: colors.blueGray900,
+      primary50: '#f2f6fb',
+      primary100: '#e4ebf3',
+      primary200: '#cbd6e4',
+      primary300: '#a9b9cc',
+      primary400: '#8499b1',
+      primary500: '#687f99',
+      primary600: '#52677f',
+      primary700: '#435367',
+      primary800: '#394654',
+      primary900: '#28313d',
 
       muted50: '#fafafa',
       muted100: '#f5f5f5',
@@ -32,13 +35,19 @@ export const config = {
       muted800: '#262626',
       muted900: '#171717',
 
-      backgroundCardLight: colors.warmGray50,
-      backgroundCardDark: colors.coolGray900,
-      borderColorCardLight: colors.warmGray100,
-      borderColorCardDark: colors.blueGray800,
+      backgroundCardLight: '#ffffff',
+      backgroundCardDark: '#111827',
+      borderColorCardLight: '#e4e8ee',
+      borderColorCardDark: '#263244',
 
-      backgroundContentLight: colors.coolGray100,
-      backgroundContentDark: colors.black
+      backgroundContentLight: '#f4f6f8',
+      backgroundContentDark: '#0b1220'
+    },
+    fonts: {
+      ...defaultConfig.tokens.fonts,
+      heading: systemSans,
+      body: systemSans,
+      mono: systemMono
     }
   }
 }

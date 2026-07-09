@@ -11,6 +11,21 @@ export function PluginApp({ children, onMessage }) {
   onMessageRef.current = onMessage
 
   useEffect(() => {
+    if (typeof document === 'undefined') return
+
+    const mode = state.colorMode === 'dark' ? 'dark' : 'light'
+    const root = document.documentElement
+    const body = document.body
+
+    root.classList.add('gs')
+    root.classList.remove('gs-light', 'gs-dark')
+    root.classList.add(`gs-${mode}`)
+    root.style.colorScheme = mode
+    root.dataset.colorMode = mode
+    if (body) body.dataset.themeId = mode
+  }, [state.colorMode])
+
+  useEffect(() => {
     return subscribeTheme((next) => {
       setState((prev) => {
         const changed =

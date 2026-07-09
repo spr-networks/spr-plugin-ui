@@ -35,9 +35,15 @@ export function AlertProvider({ children }) {
   const value = useMemo(() => {
     const show = (action) => (title, message) => {
       toast.show({
-        placement: 'top',
+        placement: 'top right',
         render: ({ id }) => (
-          <Toast nativeID={`toast-${id}`} action={action} variant="accent">
+          <Toast
+            nativeID={`toast-${id}`}
+            action={action}
+            variant="accent"
+            borderRadius="$xl"
+            sx={{ '@base': { boxShadow: '0 12px 28px rgba(15, 23, 42, 0.18)' } }}
+          >
             <VStack space="xs">
               <ToastTitle>{asText(title)}</ToastTitle>
               {message != null ? (

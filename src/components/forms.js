@@ -44,11 +44,24 @@ export const TextField = ({
 }) => (
   <FormControl isInvalid={!!error} isDisabled={isDisabled} {...props}>
     {label ? (
-      <FormControlLabel>
-        <FormControlLabelText>{label}</FormControlLabelText>
+      <FormControlLabel mb="$1.5">
+        <FormControlLabelText fontWeight="$semibold" color="$textLight800" sx={{ _dark: { color: '$textDark100' } }}>
+          {label}
+        </FormControlLabelText>
       </FormControlLabel>
     ) : null}
-    <Input>
+    <Input
+      size="md"
+      borderRadius="$xl"
+      borderColor="$muted300"
+      bg="$backgroundCardLight"
+      sx={{
+        _dark: {
+          bg: '$backgroundCardDark',
+          borderColor: '$muted700'
+        }
+      }}
+    >
       <InputField
         value={value}
         onChangeText={onChangeText}
@@ -59,12 +72,12 @@ export const TextField = ({
       />
     </Input>
     {helper && !error ? (
-      <FormControlHelper>
+      <FormControlHelper mt="$1.5">
         <FormControlHelperText>{helper}</FormControlHelperText>
       </FormControlHelper>
     ) : null}
     {error ? (
-      <FormControlError>
+      <FormControlError mt="$1.5">
         <FormControlErrorText>{error}</FormControlErrorText>
       </FormControlError>
     ) : null}
@@ -74,7 +87,7 @@ export const TextField = ({
 export const ModalForm = ({ isOpen, onClose, title, children }) => (
   <Modal isOpen={isOpen} onClose={onClose}>
     <ModalBackdrop />
-    <ModalContent>
+    <ModalContent borderRadius="$2xl" borderColor="$borderColorCardLight" sx={{ _dark: { borderColor: '$borderColorCardDark' } }}>
       <ModalHeader>
         <Heading size="sm">{title}</Heading>
         <ModalCloseButton>
@@ -98,7 +111,7 @@ export const ModalConfirm = ({
 }) => (
   <AlertDialog isOpen={isOpen} onClose={onClose}>
     <AlertDialogBackdrop />
-    <AlertDialogContent>
+    <AlertDialogContent borderRadius="$2xl" borderColor="$borderColorCardLight" sx={{ _dark: { borderColor: '$borderColorCardDark' } }}>
       <AlertDialogHeader>
         <Heading size="md">{title}</Heading>
       </AlertDialogHeader>
