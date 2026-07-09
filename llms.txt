@@ -1,0 +1,116 @@
+# @spr-networks/plugin-ui
+
+Frontend kit for SPR router plugins. A plugin UI is a Create React App (react-scripts +
+craco) bundled to a single self-contained build/index.html, served by the plugin's Go
+backend, and embedded by the SPR app in an iframe. This package provides the SPR look,
+theme sync with the host, an authenticated API client, and UI primitives.
+
+Import EVERYTHING from this one package. It re-exports all of @gluestack-ui/themed
+(Box, VStack, HStack, Button, ButtonText, Input, Badge, Switch, Spinner, useToast, ...)
+plus the SPR-specific exports below. Never import '@gluestack-ui/themed' directly.
+Note: `Card` from this package is the SPR-styled card and intentionally overrides
+gluestack's Card.
+
+## Entry point
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { PluginApp } from '@spr-networks/plugin-ui'
+import Plugin from './Plugin'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <PluginApp><Plugin /></PluginApp>
+)
+
+PluginApp = GluestackUIProvider preconfigured with SPR tokens + automatic theme sync
+with the host (light/dark and custom theme colors, via window.SPR_THEME and postMessage
+{type:'spr:theme'}) + AlertProvider for toasts. Optional prop: onMessage(data, event)
+to observe non-theme messages from the host.
+
+## API client
+
+import { api, API } from '@spr-networks/plugin-ui'
+
+api.get('/plugins/<uri>/config')      -> Promise<parsed json>
+api.put('/plugins/<uri>/config', obj) -> Promise
+api.post(url, obj), api.delete(url)
+api.pluginURI()                       -> the plugin's URI string from the host
+api.getApiURL()                       -> SPR API base URL
+
+Subclass for a plugin's own base path:
+class MyAPI extends API {
+  constructor() { super(`/plugins/${api.pluginURI()}/`) }
+  config() { return this.get('config') }
+  save(c) { return this.put('config', c) }
+}
+
+Requests are authenticated automatically (host-injected globals + SPR session).
+Rejections have shape { message, status, response }.
+
+## Alerts (toasts)
+
+import { useAlert } from '@spr-networks/plugin-ui'
+const alert = useAlert()
+alert.success('Saved')
+alert.error('Failed to save', err)     // second arg optional: string or Error
+alert.warning(...), alert.info(...)
+Works anywhere under PluginApp.
+
+## Layout
+
+<Page>...</Page>                 whole-view container: padding, content background,
+                                 centered max-width column, min-height 100vh
+<ListHeader title description>   page/section heading; children render on the right
+  <Button .../>
+</ListHeader>
+<ListItem>...</ListItem>         card-styled row with bottom border
+<EmptyState icon title description>children</EmptyState>
+<Loading text />                 centered spinner
+
+## Cards + stats
+
+<Card>...</Card>                              SPR surface card (rounded, bordered)
+<SectionHeader title count right={<node>} />  heading row inside a card
+<StatTile label value mono />                 metric cell; wrap several in
+                                              <HStack flexWrap="wrap" gap="$2">
+<KeyVal label value mono />                   label/value row
+<StatusDot online warn />                     green/amber/muted status dot
+<Toggle value onPress disabled />             pill switch
+
+## Forms
+
+<TextField label value onChangeText placeholder helper error secureTextEntry />
+<ModalForm isOpen onClose title>form children</ModalForm>
+<ModalConfirm isOpen onClose onConfirm title message confirmText destructive />
+
+## Styling rules
+
+- Use gluestack tokens: p="$4", space="md", bg="$backgroundCardLight", color="$muted500"
+- Dark mode via sx: sx={{ _dark: { bg: '$backgroundCardDark' } }}
+- Do not hardcode hex colors; the host theme overrides tokens at runtime
+- primary = SPR brand ramp, muted = neutral ramp; card surfaces use
+  backgroundCardLight/Dark + borderColorCardLight/Dark, page background uses
+  backgroundContentLight/Dark
+
+## Build scaffolding (template/)
+
+template/index.js        entry rendering <PluginApp><Plugin/></PluginApp>
+template/Plugin.js       worked example: load config, cards, stats, form, confirm
+template/craco.config.js inlines the bundle into one index.html and transpiles
+                         @gluestack-ui, @gluestack-style, @legendapp and this package
+template/bundle.sh       npx craco build + inline step -> build/index.html
+template/public/index.html
+
+Plugin package.json needs: react, react-dom, react-scripts 5, @craco/craco,
+@gluestack-ui/themed 1.1.3, @gluestack-ui/config 1.1.2, @gluestack-style/react 1.0.45,
+react-native-web, react-native-svg, babel-plugin-react-native-web, and this package via
+git URL: "@spr-networks/plugin-ui": "git+https://github.com/spr-networks/spr-plugin-ui.git"
+
+## Host integration contract (for reference)
+
+- Production: SPR fetches the plugin's index.html, injects window.SPR_API_URL,
+  window.SPR_PLUGIN = {Name, URI, GitURL}, window.SPR_THEME = {colorMode, theme, colors},
+  and renders it as iframe srcDoc. colors is a flat {gluestackToken: '#hex'} map.
+- Dev: iframe src=http://localhost:8080?colorMode=light|dark
+- Live theme changes: host posts JSON {type:'spr:theme', colorMode, theme, colors}
+- On mount the kit posts {type:'spr:ready'} to the host, which re-sends the theme

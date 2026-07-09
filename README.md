@@ -1,11 +1,20 @@
 # @spr-networks/plugin-ui
 
 Shared frontend kit for [SPR](https://www.supernetworks.org) plugins. Gives a plugin's
-web UI the SPR gluestack look, a matching API client, small UI primitives, and an
-automatic theme bridge so the plugin follows the host's light/dark mode and custom themes.
+web UI the SPR gluestack look, a matching authenticated API client, UI primitives, toast
+alerts, and an automatic theme bridge so the plugin follows the host's light/dark mode
+and custom themes.
 
 SPR plugin UIs run in an `iframe` embedded by the SPR app. This package handles the
 provider setup and the host↔iframe theme handshake for you.
+
+**One import surface:** the package re-exports all of `@gluestack-ui/themed`, so a plugin
+imports everything — gluestack components and SPR fittings — from
+`@spr-networks/plugin-ui` alone. (`Card` is the SPR-styled version, overriding
+gluestack's.)
+
+An LLM-oriented API reference lives in [`llms.txt`](./llms.txt) — point coding agents at
+it when generating plugin UIs.
 
 ## Install
 
@@ -38,16 +47,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 ```
 
-Inside your plugin, use the API client and primitives:
+Inside the plugin:
 
 ```jsx
-import { api, API, Card, StatTile, SectionHeader, StatusDot, Toggle, KeyVal } from '@spr-networks/plugin-ui'
-
-class MyAPI extends API {
-  constructor() { super(`/plugins/${api.pluginURI()}/`) }
-  config() { return this.get('config') }
-}
+import {
+  api, API, useAlert,
+  Page, ListHeader, Card, SectionHeader, StatTile, KeyVal, StatusDot, Toggle,
+  TextField, ModalForm, ModalConfirm, EmptyState, Loading,
+  Button, ButtonText, HStack, VStack
+} from '@spr-networks/plugin-ui'
 ```
+
+See `template/Plugin.js` for a complete worked example (load config, status card,
+stats grid, settings form, confirm dialog, toasts).
 
 ## Theme bridge
 
@@ -61,14 +73,18 @@ Pass `onMessage` to `PluginApp` to observe non-theme host messages.
 
 ## Exports
 
-- `PluginApp` — provider + theme bridge wrapper
+- `PluginApp` — provider + theme bridge + alert provider
+- everything from `@gluestack-ui/themed` (Box, Button, Input, Badge, useToast, ...)
 - `config` — the SPR gluestack config
 - `api`, `API` — API client (reads `window.SPR_API_URL`, rides the SPR session)
-- `Card`, `StatusDot`, `StatTile`, `SectionHeader`, `Toggle`, `KeyVal` — UI primitives
+- `useAlert`, `AlertProvider` — toast alerts (`alert.success/error/warning/info`)
+- `Page`, `ListHeader`, `ListItem`, `EmptyState`, `Loading` — layout
+- `Card`, `StatusDot`, `StatTile`, `SectionHeader`, `Toggle`, `KeyVal` — fittings
+- `TextField`, `ModalForm`, `ModalConfirm` — forms
 - `readInitialTheme`, `subscribeTheme`, `READY_MESSAGE` — theme bridge internals
 
 ## template/
 
-Drop-in build scaffolding for a plugin frontend: `craco.config.js` (inlines the bundle to a
-single `index.html`, transpiles gluestack + this package), `bundle.sh`, `public/index.html`,
-and an `index.js` entry.
+Drop-in scaffolding for a plugin frontend: `index.js` entry, `Plugin.js` worked example,
+`craco.config.js` (inlines the bundle to a single `index.html`, transpiles gluestack +
+this package), `bundle.sh`, `public/index.html`.

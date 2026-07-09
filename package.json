@@ -1,6 +1,6 @@
 {
   "name": "@spr-networks/plugin-ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared SPR plugin frontend kit: gluestack theme fittings, iframe theme bridge, API client, and UI primitives.",
   "license": "MIT",
   "main": "src/index.js",

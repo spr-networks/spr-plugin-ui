@@ -16,15 +16,16 @@ module.exports = {
         /node_modules[\\/]@legendapp[\\/]/,
         /node_modules[\\/]@spr-networks[\\/]plugin-ui[\\/]/
       ]
-      webpackConfig.module.rules.forEach((rule) => {
-        if (!rule.oneOf) return
-        rule.oneOf.forEach((loader) => {
-          const usesBabel =
-            loader.loader && loader.loader.includes('babel-loader') && loader.include
-          if (usesBabel) {
-            loader.include = [].concat(loader.include, transpileModules)
-          }
-        })
+      const oneOf = webpackConfig.module.rules.find((rule) => rule.oneOf).oneOf
+      const appBabel = oneOf.find(
+        (loader) =>
+          loader.loader && loader.loader.includes('babel-loader') && loader.include
+      )
+      oneOf.unshift({
+        test: /\.(js|mjs|jsx)$/,
+        include: transpileModules,
+        loader: appBabel.loader,
+        options: { ...appBabel.options, sourceType: 'unambiguous' }
       })
 
       const oneOfRuleIdx = webpackConfig.module.rules.findIndex((rule) => !!rule.oneOf)

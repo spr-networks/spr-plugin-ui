@@ -3,6 +3,7 @@ import { GluestackUIProvider } from '@gluestack-ui/themed'
 
 import { config } from './config'
 import { readInitialTheme, subscribeTheme } from './theme'
+import { AlertProvider } from './alerts'
 
 export function PluginApp({ children, onMessage }) {
   const [state, setState] = useState(() => ({ ...readInitialTheme(), rev: 0 }))
@@ -64,7 +65,7 @@ export function PluginApp({ children, onMessage }) {
       config={themedConfig}
       colorMode={state.colorMode || 'light'}
     >
-      {children}
+      <AlertProvider>{children}</AlertProvider>
     </GluestackUIProvider>
   )
 }
