@@ -55,7 +55,7 @@ Inside the plugin:
 import {
   api, API, useAlert,
   Page, ListHeader, Card, SectionHeader, StatTile, KeyVal, StatusDot, Toggle,
-  TextField, ModalForm, ModalConfirm, EmptyState, Loading,
+  TextField, ClientSelect, ModalForm, ModalConfirm, EmptyState, Loading,
   Button, ButtonText, HStack, VStack
 } from '@spr-networks/plugin-ui'
 ```
@@ -83,6 +83,8 @@ Pass `onMessage` to `PluginApp` to observe non-theme host messages.
 - `Page`, `ListHeader`, `ListItem`, `EmptyState`, `Loading` — layout
 - `Card`, `StatusDot`, `StatTile`, `SectionHeader`, `Toggle`, `KeyVal` — fittings
 - `TextField`, `ModalForm`, `ModalConfirm` — forms
+- `ClientSelect` — searchable multi-device selector; pass `value`, `onChange`, and
+  optionally an already-loaded `devices` map
 - `timeAgo` — humanize an RFC3339 timestamp (`'5m ago'`; `null` for empty/Go zero time)
 - `readInitialTheme`, `subscribeTheme`, `READY_MESSAGE` — theme bridge internals
 

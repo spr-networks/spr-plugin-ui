@@ -80,6 +80,7 @@ Works anywhere under PluginApp.
 ## Forms
 
 <TextField label value onChangeText placeholder helper error secureTextEntry />
+<ClientSelect value onChange devices exclude label helperText placeholder />
 <ModalForm isOpen onClose title>form children</ModalForm>
 <ModalConfirm isOpen onClose onConfirm title message confirmText destructive />
 
