@@ -1,5 +1,100 @@
 const win = typeof window !== 'undefined' ? window : {}
 
+export const PLUGIN_UI_AUTH_PROTOCOL_VERSION = 1
+
+let authRefresh = null
+
+const parseParentMessage = (event) => {
+  if (!win.parent || event.source !== win.parent) {
+    return null
+  }
+  let data = event.data
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data)
+    } catch (err) {
+      return null
+    }
+  }
+  return data && typeof data === 'object' ? data : null
+}
+
+const handleParentAuth = (event) => {
+  const data = parseParentMessage(event)
+  if (
+    !data ||
+    data.type !== 'spr:auth' ||
+    data.protocolVersion !== PLUGIN_UI_AUTH_PROTOCOL_VERSION ||
+    typeof data.token !== 'string' ||
+    !data.token
+  ) {
+    return
+  }
+
+  win.SPR_API_TOKEN = data.token
+  win.SPR_API_TOKEN_EXPIRES_AT = data.expiresAt
+  if (authRefresh && data.requestId === authRefresh.requestId) {
+    authRefresh.resolve(true)
+  }
+}
+
+if (typeof win.addEventListener === 'function') {
+  win.addEventListener('message', handleParentAuth, false)
+}
+
+const rekeyRequestID = () => {
+  if (typeof win.crypto?.randomUUID === 'function') {
+    return win.crypto.randomUUID()
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+const requestPluginUIRekey = () => {
+  if (
+    win.SPR_PLUGIN_UI_AUTH_VERSION !== PLUGIN_UI_AUTH_PROTOCOL_VERSION ||
+    !win.parent ||
+    win.parent === win ||
+    typeof win.parent.postMessage !== 'function'
+  ) {
+    return Promise.resolve(false)
+  }
+  if (authRefresh) {
+    return authRefresh.promise
+  }
+
+  const requestId = rekeyRequestID()
+  let resolveRefresh
+  const promise = new Promise((resolve) => {
+    resolveRefresh = resolve
+  })
+  const timeout = setTimeout(() => resolveRefresh(false), 10000)
+  authRefresh = {
+    requestId,
+    promise,
+    resolve: (refreshed) => {
+      clearTimeout(timeout)
+      resolveRefresh(refreshed)
+    }
+  }
+  promise.finally(() => {
+    authRefresh = null
+  })
+
+  try {
+    win.parent.postMessage(
+      JSON.stringify({
+        type: 'spr:auth-required',
+        protocolVersion: PLUGIN_UI_AUTH_PROTOCOL_VERSION,
+        requestId
+      }),
+      '*'
+    )
+  } catch (err) {
+    authRefresh.resolve(false)
+  }
+  return promise
+}
+
 export class API {
   baseURL = ''
   authHeaders = ''
@@ -33,20 +128,21 @@ export class API {
     return (win.SPR_PLUGIN && win.SPR_PLUGIN.URI) || null
   }
 
-  async fetch(method = 'GET', url, body) {
+  async fetch(method = 'GET', url, body, allowRekey = true) {
     if (url === undefined) {
       url = method
       method = 'GET'
     }
 
-    if (!this.authHeaders) {
-      this.authHeaders = this.getAuthHeaders()
-    }
+    this.authHeaders = this.getAuthHeaders()
 
     const headers = {
-      Authorization: this.authHeaders,
       'X-Requested-With': 'react',
       'Content-Type': 'application/json'
+    }
+
+    if (this.authHeaders) {
+      headers.Authorization = this.authHeaders
     }
 
     const opts = { method, headers }
@@ -59,7 +155,17 @@ export class API {
       url = url.substr(1)
     }
 
-    return fetch(`${baseURL}${url}`, opts)
+    const response = await fetch(`${baseURL}${url}`, opts)
+    if (
+      allowRekey &&
+      response.status === 401 &&
+      response.headers.get('X-SPR-Auth-Error') === 'invalid_token' &&
+      (await requestPluginUIRekey())
+    ) {
+      this.authHeaders = ''
+      return this.fetch(method, url, body, false)
+    }
+    return response
   }
 
   async request(method, url, body) {
